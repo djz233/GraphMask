@@ -1,0 +1,61 @@
+{
+    "task": {
+      "id": "PD", 
+      "problem_class": "PD",
+      "dataset_folder": "data/kaggle2/", //kaggle or pandora dataset
+      "cache": "cache/PD",
+      "clear_cache": false,
+      "max_nodes": 550, //max-num of node for heterogeneous graph
+      "max_len": 70, //max-len for each post
+      "max_post": 50, //max-num of posts for each user
+      "liwc_num": 73, //number of liwc categories for each user
+      "max_idx": 5, //max-num of idx for each subword
+      "pad": 0, //the idx of [pad] token
+      "num_labels": 4, //the number of personality dimension
+      "d_model": 768, //hidden size for PkaBERT
+      "head": 12, //the number of attntion-head for Flow_GAT
+    },
+    "model_parameters":{
+      "gnn_layers": 1
+    },
+    "preprocessing":{
+      "bert_embeddings": "data/bert-base-uncased"
+    },
+    "training":
+    {
+      "batch_size": 8,
+      "batch_size_multiplier": 1,
+      "max_epochs": 30,
+      "train_split": "train", //train or test
+      "test_every_n": 1,
+      "save_path": "models/qa.model",
+      "PTM_learning_rate": 2e-5,
+      "other_learning_rate": 1e-3,
+      "seed": 231,
+      "main_cuda": "cuda:0",
+      "cuda_lists": [0,1,2,3],  //list of cuda or None
+      "gradient_accumulation_steps": 4,
+      "max_grad_norm": 1, //maxinum of gradient
+      "alpha": 0.02, //negative_slope for leakeyReLU
+      "dropout": 0.2 //dropout rate for attention in Flow_GAT
+      
+    },
+    "analysis":
+    {
+      "strategy": "GraphMask",
+      "parameters": {
+        "load": false,
+        "train": true,
+        "batch_size": 2,
+        "batch_size_multiplier": 16,
+        "learning_rate": 3e-4,
+        "epochs_per_layer": 3,
+        "test_every_n": 1,
+        "train_split": "train",
+        "save_path": "models/pd.model.graphmask",
+        "penalty_scaling": 2,
+        "allowance": 0.03,
+        "max_allowed_performance_diff": 0.05
+      }
+    }
+  }
