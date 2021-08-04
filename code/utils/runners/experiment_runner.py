@@ -52,7 +52,6 @@ class ExperimentRunner:
         train_split = self.configuration["training"]["train_split"]
         test_every_n = self.configuration["training"]["test_every_n"]
         save_path = self.configuration["training"]["save_path"]
-        learning_rate = self.configuration["training"]["learning_rate"]
 
         if "batch_size_multiplier" in self.configuration["training"] and self.configuration["training"]["batch_size_multiplier"] > 1:
             batch_size_multiplier = self.configuration["training"]["batch_size_multiplier"]
@@ -63,7 +62,19 @@ class ExperimentRunner:
         device = torch.device('cuda:' + str(gpu_number) if torch.cuda.is_available() and gpu_number >= 0 else 'cpu')
         model.set_device(device)
 
-        optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+        if self.configuration["task"]["id"] is not "PD":
+            learning_rate = self.configuration["training"]["learning_rate"]
+            optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)  
+        else:
+            ptm_id = list(map(id, model.ptm_encoder.parameters()))
+            other_params = filter(lambda p: id(p) not in ptm_id, model.parameters())
+            learning_rate = [
+                {'params': other_params, 'lr' : self.configuration["training"]["other_learning_rate"]},
+                {'params': model.ptm_encoder.parameters(), 'lr' : self.configuration["training"]["PTM_learning_rate"]}
+            ]
+            optimizer = torch.optim.Adam(learning_rate)
+        
+        
 
         best_dev_performance = None
 
